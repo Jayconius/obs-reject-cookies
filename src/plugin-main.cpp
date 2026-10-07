@@ -39,18 +39,37 @@ const char *kInstallScript = R"JS(
   if (!/(^|\.)twitch\.tv$/.test(location.hostname)) return;
   window.__obsRejectCookies = true;
 
-  function tryReject() {
+  function findReject() {
     var accept = document.querySelector('[data-a-target="consent-banner-accept"]');
-    if (!accept) return;
-    var others = [];
+    if (!accept) return null;
     for (var n = accept.parentElement; n && n !== document.body; n = n.parentElement) {
-      others = [].filter.call(n.querySelectorAll('button'), function (b) {
+      var others = [].filter.call(n.querySelectorAll('button'), function (b) {
         var t = b.getAttribute('data-a-target');
         return t !== 'consent-banner-accept' && t !== 'consent-banner-manage-preferences';
       });
-      if (others.length) break;
+      if (others.length) return others.length === 1 ? others[0] : null;
     }
-    if (others.length === 1) others[0].click();
+    return null;
+  }
+
+  // A click made the instant the banner renders can be ignored if Twitch isn't ready yet,
+  // so keep clicking once a second until the banner is gone (for up to a minute).
+  var retry = null;
+  function tryReject() {
+    if (retry) return;
+    var btn = findReject();
+    if (!btn) return;
+    btn.click();
+    var tries = 0;
+    retry = setInterval(function () {
+      var again = findReject();
+      if (!again || ++tries > 60) {
+        clearInterval(retry);
+        retry = null;
+        return;
+      }
+      again.click();
+    }, 1000);
   }
 
   tryReject();
