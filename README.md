@@ -8,25 +8,28 @@ Unofficial; not affiliated with OBS or Twitch.
 
 ## Install (Windows, 64-bit)
 
-1. Download `obs-reject-cookies-1.0.0-windows-x64.zip` from the [latest release](../../releases/latest).
+1. Download the `obs-reject-cookies-<version>-windows-x64.zip` file from the [latest release](../../releases/latest).
 2. Close OBS.
 3. Extract the zip into your OBS folder (e.g. `C:\Program Files\obs-studio`, or your portable folder),
    so that `obs-reject-cookies.dll` ends up in `obs-plugins\64bit`.
-4. Start OBS. Banners are rejected within a couple of seconds of a dock loading.
+4. Start OBS. Banners are rejected as soon as they appear.
 
 Uninstall: delete `obs-plugins\64bit\obs-reject-cookies.dll`.
 
 ## How it works
 
-Every 2 seconds the plugin runs a tiny script in each of OBS's browser docks, using the same interface
-OBS uses for its own docks. The script does nothing unless the page is on `twitch.tv` and the consent banner is
-showing; then it clicks the "Reject" button. It collects no data and makes no network requests.
+The plugin finds OBS's browser docks (using the same interface OBS uses for its own docks) and adds a small
+script to each page once, and again if the dock navigates or reloads. On `twitch.tv` pages the script watches
+for the consent banner and clicks its reject button the moment it appears. The button is found by its position
+in the banner, not its label, so it works in any Twitch language. Other sites are left alone. It collects no
+data and makes no network requests.
 
 ## Notes
 
-- Tested on OBS 32.2.1 (Windows). Needs the OBS browser module (`obs-browser`) to be enabled.
-- It depends on Twitch's current banner markup (`data-a-target="consent-banner-accept"` and a button labelled
-  "Reject"), so it may need an update if Twitch changes it.
+- Requires OBS 31 or newer on Windows (64-bit), with the built-in browser module (`obs-browser`), which
+  is included and enabled by default. Tested on OBS 32.2.1.
+- It depends on Twitch's current banner markup (`data-a-target="consent-banner-accept"`), so it may need
+  an update if Twitch changes it.
 
 ## Build
 
@@ -37,8 +40,7 @@ cmake --preset windows-x64
 cmake --build build_x64 --config RelWithDebInfo
 ```
 
-`legacy-script/` holds an earlier external-script version that needed OBS launched with a debug port. It is
-superseded by the plugin.
+Release zips are built by GitHub Actions from the tagged source (see `.github/workflows/build.yml`).
 
 ## License
 

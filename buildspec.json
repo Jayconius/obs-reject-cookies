@@ -38,7 +38,7 @@
     },
     "name": "obs-reject-cookies",
     "displayName": "Reject Cookies (Twitch docks)",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "author": "Jayconius",
     "website": "https://github.com/Jayconius/obs-reject-cookies",
     "email": "Jayconius@users.noreply.github.com"

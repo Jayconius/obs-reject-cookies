@@ -24,7 +24,7 @@
 
 # Exclude CMake build number cache
 /cmake/.CMakeBuildNumber
-obs-path.txt
 build_x64/
 dist/
 *.zip
+build_*/

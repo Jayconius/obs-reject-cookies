@@ -34,6 +34,8 @@ if(ENABLE_QT)
   )
 endif()
 
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-main.cpp)
+target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-main.cpp src/browser-panel.hpp)
+# browser-panel.hpp is obs-browser's interface; its meta-object lives in obs-browser, not here.
+set_source_files_properties(src/browser-panel.hpp PROPERTIES SKIP_AUTOMOC ON)
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})
