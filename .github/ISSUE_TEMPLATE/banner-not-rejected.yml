@@ -1,0 +1,74 @@
+name: Banner not rejected
+description: The cookie banner still shows in one or more Twitch docks.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! These details help reproduce the problem, especially if it only happens in some languages or countries.
+
+  - type: input
+    id: twitch-language
+    attributes:
+      label: Twitch language
+      description: Profile menu → Language on twitch.tv.
+      placeholder: e.g. Deutsch, Español, Français
+    validations:
+      required: true
+
+  - type: input
+    id: country
+    attributes:
+      label: Country
+      description: The banner can differ by region, e.g. in the EU or UK.
+      placeholder: e.g. Germany
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: docks
+    attributes:
+      label: Which docks still show the banner?
+      options:
+        - label: Chat
+        - label: Stats
+        - label: Activity Feed
+        - label: Stream Info
+        - label: Other (say which below)
+
+  - type: input
+    id: obs-version
+    attributes:
+      label: OBS version
+      description: Help → About.
+      placeholder: e.g. 32.2.1
+    validations:
+      required: true
+
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin version
+      description: The release you installed.
+      placeholder: e.g. v1.1.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot of the banner
+      description: Pop the dock out (float it) so all buttons are visible, then drag the screenshot in here.
+    validations:
+      required: true
+
+  - type: textarea
+    id: log
+    attributes:
+      label: OBS log (optional)
+      description: Help → Log Files → Upload Current Log File, then paste the link here.
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else?
