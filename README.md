@@ -1,5 +1,7 @@
 # Reject Cookies for OBS
 
+[![Build](https://github.com/Jayconius/obs-reject-cookies/actions/workflows/build.yml/badge.svg)](https://github.com/Jayconius/obs-reject-cookies/actions/workflows/build.yml)
+
 An OBS Studio plugin that automatically clicks **Reject** on Twitch's "Cookies and Advertising Choices"
 banner in OBS's built-in Twitch docks (Chat, Stats, Activity Feed, Stream Info). No more pulling docks out
 to reach a button that's cut off.
@@ -21,7 +23,7 @@ Uninstall: delete `obs-plugins\64bit\obs-reject-cookies.dll`.
 The plugin finds OBS's browser docks (using the same interface OBS uses for its own docks) and adds a small
 script to each page once, and again if the dock navigates or reloads. On `twitch.tv` pages the script watches
 for the consent banner and clicks its reject button the moment it appears. The button is found by its position
-in the banner, not its label, so it works in any Twitch language. Other sites are left alone. It collects no
+in the banner rather than its label, so it should work in any Twitch language (only English has been tested so far). Other sites are left alone. It collects no
 data and makes no network requests.
 
 ## Notes
