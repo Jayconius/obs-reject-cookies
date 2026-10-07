@@ -30,6 +30,7 @@ data and makes no network requests.
 
 - Requires OBS 31 or newer on Windows (64-bit), with the built-in browser module (`obs-browser`), which
   is included and enabled by default. Tested on OBS 32.2.1.
+- Windows only. Linux and macOS ports are welcome as forks or pull requests.
 - It depends on Twitch's current banner markup (`data-a-target="consent-banner-accept"`), so it may need
   an update if Twitch changes it.
 
