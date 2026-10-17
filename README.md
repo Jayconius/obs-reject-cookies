@@ -20,10 +20,11 @@ Uninstall: delete `obs-plugins\64bit\obs-reject-cookies.dll`.
 
 ## How it works
 
-The plugin finds OBS's browser docks (using the same interface OBS uses for its own docks) and adds a small
-script to each page once, and again if the dock navigates or reloads. On `twitch.tv` pages the script watches
-for the consent banner and clicks its reject button the moment it appears. The button is found by its position
-in the banner rather than its label, so it should work in any Twitch language (only English has been tested so far). Other sites are left alone. It collects no
+Every 2 seconds the plugin offers a small script to each of OBS's browser docks (using the same interface
+OBS uses for its own docks). Pages that already have it ignore it, so docks that load slowly or reload are
+still covered. On `twitch.tv` pages the script watches for the consent banner and clicks its reject button
+as soon as it appears, retrying until the banner closes. The button is found by its position in the banner
+rather than its label, so it should work in any Twitch language (only English has been tested so far). Other sites are left alone. It collects no
 data and makes no network requests.
 
 ## Notes

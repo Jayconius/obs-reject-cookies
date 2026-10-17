@@ -19,8 +19,6 @@ GNU General Public License for more details.
 
 #include <QApplication>
 #include <QMetaObject>
-#include <QPointer>
-#include <QSet>
 #include <QTimer>
 #include <QWidget>
 
@@ -30,7 +28,8 @@ OBS_DECLARE_MODULE()
 
 namespace {
 
-// Installed once per page. On twitch.tv it watches the DOM and clicks the banner's reject
+// Sent to every browser dock every couple of seconds; the guard makes it a no-op once a page
+// has it, so slow-loading docks and reloads are picked up. On twitch.tv it watches the DOM and clicks the banner's reject
 // button as soon as it appears. The button is found by position, not label, so it works in
 // any Twitch language: it's the one button next to Accept that isn't Accept or Customize.
 const char *kInstallScript = R"JS(
@@ -53,17 +52,16 @@ const char *kInstallScript = R"JS(
   }
 
   // A click made the instant the banner renders can be ignored if Twitch isn't ready yet,
-  // so keep clicking once a second until the banner is gone (for up to a minute).
+  // so keep clicking once a second until the banner is gone.
   var retry = null;
   function tryReject() {
     if (retry) return;
     var btn = findReject();
     if (!btn) return;
     btn.click();
-    var tries = 0;
     retry = setInterval(function () {
       var again = findReject();
-      if (!again || ++tries > 60) {
+      if (!again) {
         clearInterval(retry);
         retry = null;
         return;
@@ -77,8 +75,7 @@ const char *kInstallScript = R"JS(
 })();
 )JS";
 
-QTimer *discoveryTimer = nullptr;
-QSet<QWidget *> seen;
+QTimer *timer = nullptr;
 
 // qobject_cast can't be used across the obs-browser DLL boundary, so match by class name instead.
 QCefWidget *asCefWidget(QWidget *w)
@@ -90,58 +87,22 @@ QCefWidget *asCefWidget(QWidget *w)
 	return nullptr;
 }
 
-// A new page may still be loading when its URL changes, so try again a little later too.
-// The script's guard makes repeat installs a no-op.
-void install(QCefWidget *cef)
-{
-	QPointer<QCefWidget> guard(cef);
-	for (int delay : {0, 1000, 4000}) {
-		QTimer::singleShot(delay, cef, [guard] {
-			if (guard)
-				guard->executeJavaScript(kInstallScript);
-		});
-	}
-}
-
-// Re-installs the script when a dock navigates or reloads. Owned by the dock it watches.
-class Reinstaller : public QObject {
-	Q_OBJECT
-
-public:
-	explicit Reinstaller(QCefWidget *cef) : QObject(cef), cef(cef) {}
-
-public slots:
-	void onUrlChanged() { install(cef); }
-
-private:
-	QCefWidget *cef;
-};
-
-// Picks up docks as they're created; each one is only set up once.
-void discover()
+void sweep()
 {
 	for (QWidget *w : QApplication::allWidgets()) {
-		if (seen.contains(w))
-			continue;
-		QCefWidget *cef = asCefWidget(w);
-		if (!cef)
-			continue;
-		seen.insert(w);
-		QObject::connect(w, &QObject::destroyed, [w] { seen.remove(w); });
-		// String-based connect resolves the signal through obs-browser's own meta-object.
-		QObject::connect(w, SIGNAL(urlChanged(QString)), new Reinstaller(cef), SLOT(onUrlChanged()));
-		install(cef);
+		if (QCefWidget *cef = asCefWidget(w))
+			cef->executeJavaScript(kInstallScript);
 	}
 }
 
 void onFrontendEvent(enum obs_frontend_event event, void *)
 {
-	if (event != OBS_FRONTEND_EVENT_FINISHED_LOADING || discoveryTimer)
+	if (event != OBS_FRONTEND_EVENT_FINISHED_LOADING || timer)
 		return;
-	discoveryTimer = new QTimer(static_cast<QWidget *>(obs_frontend_get_main_window()));
-	QObject::connect(discoveryTimer, &QTimer::timeout, discover);
-	discoveryTimer->start(1000);
-	discover();
+	timer = new QTimer(static_cast<QWidget *>(obs_frontend_get_main_window()));
+	QObject::connect(timer, &QTimer::timeout, sweep);
+	timer->start(2000);
+	sweep();
 	obs_log(LOG_INFO, "watching browser docks for Twitch cookie banners");
 }
 
@@ -157,9 +118,8 @@ bool obs_module_load(void)
 void obs_module_unload(void)
 {
 	obs_frontend_remove_event_callback(onFrontendEvent, nullptr);
-	if (discoveryTimer)
-		discoveryTimer->stop();
+	if (timer)
+		timer->stop();
 	obs_log(LOG_INFO, "plugin unloaded");
 }
 
-#include "plugin-main.moc"
